@@ -30,7 +30,7 @@ print(input_data)
    
 print("----------------------HASH MY FILES----------------------\n")
 print("Choose your mode:")
-choice = input('1\) Scan all directories, subdirectories and compute the SHA-256 hash of each file \n2\) Check the modification\n3\)Exit\n')
+choice = input('1\) Scan all directories, subdirectories and compute the SHA-256 hash of each file \n2\) Check the modification\n3\) Exit\n')
 
 if(choice== '1'):
    dictionary = {}
@@ -74,13 +74,19 @@ elif(choice=='2'):
       
    currentDictionary = {}
    for root2, dirs2, files2 in os.walk(sys.argv[1], topdown=False):
-      for name2 in files2:
-         with open(os.path.join(root2, name2), 'rb') as afile2:
-            buf2 = afile2.read()
-            currentDictionary[name2]= hashlib.sha256(buf2).hexdigest()
-      for folder2 in dirs2:
-         if(folder2 != []):
-            currentDictionary[folder2]="folder"   
+      matching2= [s for s in input_data if s in root2]
+      if(len(matching2)==0):      
+         for name2 in files2:
+            if(name2 not in input_data):
+               with open(os.path.join(root2, name2), 'rb') as afile2:
+                  buf2 = afile2.read()
+                  currentDictionary[name2]= hashlib.sha256(buf2).hexdigest()
+         for folder2 in dirs2:
+            if(folder2 not in input_data):
+               if(folder2 != []):
+                  currentDictionary[folder2]="folder"   
+      else:
+         continue
 
    finalDocument={}
    for key in dictionaryFromFile.keys():
@@ -116,23 +122,13 @@ elif(choice=='2'):
          else:
             finalDocument[key]="File deleted"
          
-         
       elif((dictionaryFromFile.get(key,"none")== "none") and (currentDictionary.get(key,"none") != "none")):
          """key ony present in the file currentDictionary"""
          if(currentDictionary[key]=="folder"):
             finalDocument[key]="Folder created"
          else:
             finalDocument[key]="File created with hash: "+currentDictionary[key]+""
-
-     
-
-
-      
    print(finalDocument)
-   
-   
-   
-   
 elif(choice=='3'):
    print("Thank you for using HASH MY FILES, see you soon !")
 else:
