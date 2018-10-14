@@ -16,33 +16,40 @@ import csv
 
 try:
    boolean= (sys.argv)==2
-   listOfExceptions= open(sys.argv[2], "r") as f
+   listOfExceptions= open(sys.argv[2], "r")
    
 except:
    print("Wrong arguments, command is: python hash.py <directory> <fileContainingExceptions>")
    sys.exit(1)
    
-   input_data = []
-   for row in csv.reader(f, delimiter=',', quoting=csv.QUOTE_NONE):
-      input_data += row
-   print(input_data)
+input_data = []
+for row in csv.reader(listOfExceptions, delimiter=',', quoting=csv.QUOTE_NONE):
+   input_data += row
+print(input_data)
 
    
 print("----------------------HASH MY FILES----------------------\n")
 print("Choose your mode:")
-
 choice = input('1\) Scan all directories, subdirectories and compute the SHA-256 hash of each file \n2\) Check the modification\n3\)Exit\n')
 
 if(choice== '1'):
    dictionary = {}
-   for root, dirs, files in os.walk(sys.argv[1], topdown=False):
-      for name in files:
-         with open(os.path.join(root, name), 'rb') as afile:
-            buf = afile.read()      
-            dictionary[name]= hashlib.sha256(buf).hexdigest()
-      for folder in dirs:
-         if(folder != []):
-            dictionary[folder]="folder"
+   for root, dirs, files in os.walk(sys.argv[1], topdown=False): 
+      matching= [s for s in input_data if s in root]
+      if(len(matching)==0):
+         for folder in dirs:
+            if(folder not in input_data):
+               if(folder != []):
+                  dictionary[folder]="folder" 
+               
+         for name in files:
+               if(name not in input_data):
+                  with open(os.path.join(root, name), 'rb') as afile:
+                     buf = afile.read()      
+                     dictionary[name]= hashlib.sha256(buf).hexdigest()
+      else:
+         continue
+           
    try:
       output = open('./output.json','w')
    except:
